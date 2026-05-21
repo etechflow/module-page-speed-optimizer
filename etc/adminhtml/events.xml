@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+    The auto-optimize observer fires in the adminhtml area only — we don't
+    want it triggering on every storefront product-save (e.g. when an admin
+    user saves wishlist items via REST). adminhtml ↔ admin-save flows.
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="catalog_product_save_after">
+        <observer name="etechflow_pso_auto_optimize_on_upload"
+                  instance="ETechFlow\PageSpeedOptimizer\Observer\AutoOptimizeOnUpload"/>
+    </event>
+</config>

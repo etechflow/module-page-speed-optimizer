@@ -25,7 +25,7 @@ class Config
     public const XML_PATH_PSI_STRATEGY     = 'etechflow_pso/psi/default_strategy';
     public const XML_PATH_PSI_TIMEOUT      = 'etechflow_pso/psi/timeout_seconds';
 
-    // Image Optimization (lifted from IO)
+    // Image Optimization (lifted from IO + extended in v2.1)
     public const XML_PATH_IMG_ENABLED      = 'etechflow_pso/image/enabled';
     public const XML_PATH_IMG_QUALITY      = 'etechflow_pso/image/quality';
     public const XML_PATH_IMG_ENGINE_ORDER = 'etechflow_pso/image/engine_order';
@@ -35,6 +35,9 @@ class Config
     public const XML_PATH_IMG_PRODUCT      = 'etechflow_pso/image/coverage_product';
     public const XML_PATH_IMG_CATEGORY     = 'etechflow_pso/image/coverage_category';
     public const XML_PATH_IMG_CMS          = 'etechflow_pso/image/coverage_cms';
+    public const XML_PATH_IMG_AVIF         = 'etechflow_pso/image/avif_enabled';
+    public const XML_PATH_IMG_SOURCE_COMPRESS = 'etechflow_pso/image/source_compress';
+    public const XML_PATH_IMG_AUTO_UPLOAD  = 'etechflow_pso/image/auto_optimize_on_upload';
 
     // Code Optimization (new in v2.0)
     public const XML_PATH_HTML_MINIFY      = 'etechflow_pso/code/html_minify';
@@ -156,6 +159,30 @@ class Config
     public function isCmsCovered(): bool
     {
         return $this->scopeConfig->isSetFlag(self::XML_PATH_IMG_CMS, ScopeInterface::SCOPE_STORE);
+    }
+
+    public function isAvifEnabled(): bool
+    {
+        if (!$this->isImageOptimizationEnabled()) {
+            return false;
+        }
+        return $this->scopeConfig->isSetFlag(self::XML_PATH_IMG_AVIF, ScopeInterface::SCOPE_STORE);
+    }
+
+    public function isSourceCompressEnabled(): bool
+    {
+        if (!$this->isImageOptimizationEnabled()) {
+            return false;
+        }
+        return $this->scopeConfig->isSetFlag(self::XML_PATH_IMG_SOURCE_COMPRESS, ScopeInterface::SCOPE_STORE);
+    }
+
+    public function isAutoOptimizeOnUploadEnabled(): bool
+    {
+        if (!$this->isImageOptimizationEnabled()) {
+            return false;
+        }
+        return $this->scopeConfig->isSetFlag(self::XML_PATH_IMG_AUTO_UPLOAD, ScopeInterface::SCOPE_STORE);
     }
 
     // ─────────────────────────────────────────────────────────

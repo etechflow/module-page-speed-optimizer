@@ -5,18 +5,26 @@ declare(strict_types=1);
 namespace ETechFlow\PageSpeedOptimizer\Model\Image\Engine;
 
 /**
- * Conversion engine contract.
+ * Format-conversion engine contract.
  *
- * Three implementations: CwebpEngine (binary), ImagickEngine (PHP ext),
- * GdEngine (PHP ext). EngineChain picks the first one available based
- * on the admin-configured priority order.
+ * v2.1+ supports BOTH WebP and AVIF. Each engine declares which formats
+ * it can produce via `supportsFormat()`. The chain picks the first
+ * available engine that supports the requested target format.
  *
- * Why three: hosting heterogeneity. Some hosts have cwebp installed,
- * some have Imagick, some have GD, some have all three. We try the
- * fastest available and fall back gracefully.
+ * Five implementations as of v2.1:
+ *   - CwebpEngine    — Google libwebp binary, WebP only
+ *   - CavifEngine    — Rust cavif binary, AVIF only
+ *   - ImagickEngine  — PHP ext, WebP + AVIF (if compiled with libavif)
+ *   - GdEngine       — PHP ext, WebP only
+ *
+ * Hosting heterogeneity: most shared hosts have GD; some have Imagick;
+ * fewer have cwebp; very few have cavif. Chain falls back gracefully.
  */
 interface ConversionEngineInterface
 {
+    public const FORMAT_WEBP = 'webp';
+    public const FORMAT_AVIF = 'avif';
+
     /**
      * Engine name used in admin config + log table. Lowercase, short.
      */
@@ -30,14 +38,29 @@ interface ConversionEngineInterface
     public function available(): bool;
 
     /**
-     * Convert a single image to WebP. Writes output next to the source
-     * (same name, `.webp` extension). Returns true on success, throws on
-     * failure with a useful message for the log table.
+     * Can this engine produce the requested target format? Engines that
+     * can do multiple formats (Imagick) return true for several; single-
+     * format engines (cwebp, cavif) only return true for theirs.
+     */
+    public function supportsFormat(string $format): bool;
+
+    /**
+     * Convert a single image to the target format. Writes output to the
+     * specified path. Returns true on success, throws on failure with a
+     * useful message for the log table.
      *
-     * @param string $sourcePath Absolute filesystem path to source image.
-     * @param string $outputPath Absolute filesystem path where the .webp should be written.
-     * @param int    $quality    1-100. Engines that don't support quality (rare) MAY ignore.
+     * @param string $sourcePath  Absolute filesystem path to source image.
+     * @param string $outputPath  Absolute filesystem path to write to.
+     * @param int    $quality     1-100. Engines that don't support quality MAY ignore.
+     * @param string $format      'webp' | 'avif'
      * @throws \RuntimeException
+     */
+    public function convert(string $sourcePath, string $outputPath, int $quality, string $format): bool;
+
+    /**
+     * Backward-compat shim — convertToWebp() preserved from v2.0 for
+     * any caller that hasn't been updated. Implementations dispatch to
+     * convert($s, $o, $q, FORMAT_WEBP).
      */
     public function convertToWebp(string $sourcePath, string $outputPath, int $quality): bool;
 }

@@ -22,6 +22,9 @@
         <plugin name="etechflow_pso_bfcache"
                 type="ETechFlow\PageSpeedOptimizer\Plugin\Response\BfcachePlugin"
                 sortOrder="40"/>
+        <plugin name="etechflow_pso_css_minify"
+                type="ETechFlow\PageSpeedOptimizer\Plugin\Response\CssMinifierPlugin"
+                sortOrder="90"/>
         <plugin name="etechflow_pso_html_minify"
                 type="ETechFlow\PageSpeedOptimizer\Plugin\Response\HtmlMinifierPlugin"
                 sortOrder="100"/>

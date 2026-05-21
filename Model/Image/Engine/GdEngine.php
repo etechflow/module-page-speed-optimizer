@@ -6,9 +6,9 @@ namespace ETechFlow\PageSpeedOptimizer\Model\Image\Engine;
 
 /**
  * Uses PHP's GD extension. Most universally available — PHP 7.0+ has
- * `imagewebp()` when compiled with `--with-webp`. Most Magento hosts
- * have GD with WebP since Magento itself uses GD as its default image
- * adapter.
+ * `imagewebp()` when compiled with `--with-webp`. AVIF support arrived
+ * in PHP 8.1 via `imageavif()` (compiled with `--with-avif`); rare on
+ * shared hosts.
  *
  * Pros: works almost everywhere with no extra setup.
  * Cons: slightly larger output than cwebp (~5-10%), no support for
@@ -23,18 +23,30 @@ class GdEngine implements ConversionEngineInterface
 
     public function available(): bool
     {
+        return \extension_loaded('gd') && \function_exists('imagewebp');
+    }
+
+    public function supportsFormat(string $format): bool
+    {
         if (!\extension_loaded('gd')) {
             return false;
         }
-        // imagewebp() is the actual function we'll call — its existence
-        // means GD was compiled with WebP support.
-        return \function_exists('imagewebp');
+        if ($format === self::FORMAT_WEBP) {
+            return \function_exists('imagewebp');
+        }
+        if ($format === self::FORMAT_AVIF) {
+            return \function_exists('imageavif');
+        }
+        return false;
     }
 
-    public function convertToWebp(string $sourcePath, string $outputPath, int $quality): bool
+    public function convert(string $sourcePath, string $outputPath, int $quality, string $format): bool
     {
         if (!is_readable($sourcePath)) {
             throw new \RuntimeException(sprintf('GD: source not readable: %s', $sourcePath));
+        }
+        if (!$this->supportsFormat($format)) {
+            throw new \RuntimeException(sprintf('GD: target format %s not available', $format));
         }
         $quality = max(1, min(100, $quality));
 
@@ -47,8 +59,6 @@ class GdEngine implements ConversionEngineInterface
             case 'image/png':
                 $resource = @\imagecreatefrompng($sourcePath);
                 if ($resource !== false) {
-                    // Preserve alpha for PNGs — without this, transparency
-                    // becomes solid black in the WebP.
                     \imagepalettetotruecolor($resource);
                     \imagealphablending($resource, true);
                     \imagesavealpha($resource, true);
@@ -64,12 +74,25 @@ class GdEngine implements ConversionEngineInterface
             throw new \RuntimeException(sprintf('GD: failed to load source image: %s', $sourcePath));
         }
         try {
-            if (!\imagewebp($resource, $outputPath, $quality)) {
-                throw new \RuntimeException(sprintf('GD: imagewebp() failed for %s', $outputPath));
+            if ($format === self::FORMAT_WEBP) {
+                if (!\imagewebp($resource, $outputPath, $quality)) {
+                    throw new \RuntimeException(sprintf('GD: imagewebp() failed for %s', $outputPath));
+                }
+            } elseif ($format === self::FORMAT_AVIF) {
+                if (!\imageavif($resource, $outputPath, $quality)) {
+                    throw new \RuntimeException(sprintf('GD: imageavif() failed for %s', $outputPath));
+                }
+            } else {
+                throw new \RuntimeException(sprintf('GD: unsupported target format %s', $format));
             }
         } finally {
             \imagedestroy($resource);
         }
         return true;
+    }
+
+    public function convertToWebp(string $sourcePath, string $outputPath, int $quality): bool
+    {
+        return $this->convert($sourcePath, $outputPath, $quality, self::FORMAT_WEBP);
     }
 }

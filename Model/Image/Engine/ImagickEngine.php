@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace ETechFlow\PageSpeedOptimizer\Model\Image\Engine;
 
 /**
- * Uses ImageMagick's PHP extension. Available where the host has both
- * the imagick PHP extension AND ImageMagick compiled with WebP support.
+ * Uses ImageMagick's PHP extension. Available where the host has the imagick
+ * PHP extension AND ImageMagick is compiled with WebP (always-on for modern
+ * builds) and/or AVIF support (built-in since ImageMagick 7.0.25 from 2020).
  *
- * Pros over GD: better quality output, supports more source formats.
- * Cons: heavier memory use, slower than cwebp binary.
- *
- * Detect availability with: php -r 'echo extension_loaded("imagick");'
- *   AND verify "WEBP" is in the supported-format list.
+ * Pros over GD: better quality output, supports more source formats, can
+ * produce AVIF. Cons: heavier memory use, slower than the binary engines.
  */
 class ImagickEngine implements ConversionEngineInterface
 {
@@ -23,21 +21,31 @@ class ImagickEngine implements ConversionEngineInterface
 
     public function available(): bool
     {
-        if (!\extension_loaded('imagick')) {
-            return false;
-        }
-        if (!\class_exists(\Imagick::class)) {
+        if (!\extension_loaded('imagick') || !\class_exists(\Imagick::class)) {
             return false;
         }
         try {
-            $formats = \Imagick::queryFormats('WEBP');
-            return !empty($formats);
+            return !empty(\Imagick::queryFormats('WEBP'))
+                || !empty(\Imagick::queryFormats('AVIF'));
         } catch (\Throwable $e) {
             return false;
         }
     }
 
-    public function convertToWebp(string $sourcePath, string $outputPath, int $quality): bool
+    public function supportsFormat(string $format): bool
+    {
+        if (!$this->available()) {
+            return false;
+        }
+        try {
+            $formatUpper = strtoupper($format);
+            return !empty(\Imagick::queryFormats($formatUpper));
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    public function convert(string $sourcePath, string $outputPath, int $quality, string $format): bool
     {
         if (!\extension_loaded('imagick')) {
             throw new \RuntimeException('Imagick extension not loaded');
@@ -45,18 +53,23 @@ class ImagickEngine implements ConversionEngineInterface
         if (!is_readable($sourcePath)) {
             throw new \RuntimeException(sprintf('Imagick: source not readable: %s', $sourcePath));
         }
+        if (!$this->supportsFormat($format)) {
+            throw new \RuntimeException(sprintf('Imagick was not compiled with %s support', strtoupper($format)));
+        }
         $quality = max(1, min(100, $quality));
 
         $imagick = new \Imagick();
         try {
             $imagick->readImage($sourcePath);
-            // Strip EXIF / colour profiles — typically not useful for WebP
-            // variants of product images and adds 1-5KB per file.
             $imagick->stripImage();
-            $imagick->setImageFormat('webp');
+            $imagick->setImageFormat($format);
             $imagick->setImageCompressionQuality($quality);
-            // method=4 is the speed/size sweet-spot, same as cwebp default.
-            $imagick->setOption('webp:method', '4');
+            if ($format === self::FORMAT_WEBP) {
+                $imagick->setOption('webp:method', '4');
+            } elseif ($format === self::FORMAT_AVIF) {
+                // heic:speed values map 1-10: lower = slower/smaller, 5 = balanced.
+                $imagick->setOption('heic:speed', '5');
+            }
             if (!$imagick->writeImage($outputPath)) {
                 throw new \RuntimeException(sprintf('Imagick: writeImage failed: %s', $outputPath));
             }
@@ -67,5 +80,10 @@ class ImagickEngine implements ConversionEngineInterface
             $imagick->destroy();
         }
         return true;
+    }
+
+    public function convertToWebp(string $sourcePath, string $outputPath, int $quality): bool
+    {
+        return $this->convert($sourcePath, $outputPath, $quality, self::FORMAT_WEBP);
     }
 }
