@@ -2,7 +2,7 @@
     "name": "etechflow/module-page-speed-optimizer",
     "description": "Magento 2 Page Speed Optimizer Pro — Google PageSpeed Insights diagnostic, WebP image conversion + picture blocks + native lazy-load, HTML minification, JS defer-to-footer, Defer Fonts Loading with exclusion list, Server Push / resource preload hints, Back/Forward Cache compatibility. Full Amasty PSO Pro feature parity at lower price.",
     "type": "magento2-module",
-    "version": "2.2.0",
+    "version": "2.3.0",
     "license": "proprietary",
     "authors": [
         {

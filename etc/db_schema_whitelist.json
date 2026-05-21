@@ -25,5 +25,48 @@
             "ETF_PSO_DIAG_IDX_URL": true,
             "ETF_PSO_DIAG_IDX_DATE": true
         }
+    },
+    "etechflow_pso_optimization_log": {
+        "column": {
+            "log_id": true,
+            "source_path": true,
+            "output_path": true,
+            "format_from": true,
+            "format_to": true,
+            "bytes_before": true,
+            "bytes_after": true,
+            "savings_pct": true,
+            "engine": true,
+            "source_mtime": true,
+            "status": true,
+            "error_message": true,
+            "optimized_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "ETF_PSO_OPT_UNQ_SOURCE_OUTPUT": true
+        },
+        "index": {
+            "ETF_PSO_OPT_IDX_SOURCE": true,
+            "ETF_PSO_OPT_IDX_STATUS_DATE": true,
+            "ETF_PSO_OPT_IDX_SAVINGS": true
+        }
+    },
+    "etechflow_pso_view_queue": {
+        "column": {
+            "queue_id": true,
+            "source_path": true,
+            "status": true,
+            "error_message": true,
+            "queued_at": true,
+            "processed_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "ETF_PSO_VQ_UNQ_SOURCE": true
+        },
+        "index": {
+            "ETF_PSO_VQ_IDX_STATUS_QUEUED": true
+        }
     }
 }

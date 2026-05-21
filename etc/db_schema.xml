@@ -88,4 +88,47 @@
         </index>
     </table>
 
+    <!--
+        etechflow_pso_view_queue
+        Smart-by-viewed: tracks source-image paths that frontend customers
+        actually viewed. The cron worker dequeues these and runs the full
+        optimization pipeline (compress + WebP + AVIF).
+
+        UNIQUE on source_path so the frontend plugin can fire-and-forget
+        with INSERT IGNORE — repeat views don't pile up duplicates.
+
+        Status:
+          - queued     fresh entry, waiting for cron
+          - processing  cron picked it up (defensive, in case of split runs)
+          - processed   optimization completed
+          - failed     optimization errored; error_message has the cause
+    -->
+    <table name="etechflow_pso_view_queue" resource="default" engine="innodb"
+           comment="ETechFlow PSO — smart-by-viewed image queue">
+
+        <column xsi:type="int" name="queue_id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Primary key"/>
+        <column xsi:type="varchar" name="source_path" length="512" nullable="false"
+                comment="Absolute path to the source image"/>
+        <column xsi:type="varchar" name="status" length="20" nullable="false" default="queued"
+                comment="queued | processing | processed | failed"/>
+        <column xsi:type="text" name="error_message" nullable="true"
+                comment="Failure cause when status=failed"/>
+        <column xsi:type="timestamp" name="queued_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="When first observed in the frontend"/>
+        <column xsi:type="timestamp" name="processed_at" on_update="false" nullable="true"
+                comment="When the optimization completed (NULL = pending)"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="queue_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ETF_PSO_VQ_UNQ_SOURCE">
+            <column name="source_path"/>
+        </constraint>
+        <index referenceId="ETF_PSO_VQ_IDX_STATUS_QUEUED" indexType="btree">
+            <column name="status"/>
+            <column name="queued_at"/>
+        </index>
+    </table>
+
 </schema>

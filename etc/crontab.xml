@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="default">
+        <!--
+            Every 5 minutes: drain the view queue.
+
+            Why default group (not index/consumers): smart-by-viewed
+            optimization is part of the user-facing experience flow; it
+            should run on the same schedule as cache/cleanup/email cron
+            jobs, not the slower index group.
+
+            Adjustable per-store via admin config (etechflow_pso/image/
+            smart_by_viewed_batch_size).
+        -->
+        <job name="etechflow_pso_process_view_queue"
+             instance="ETechFlow\PageSpeedOptimizer\Cron\ProcessViewQueue"
+             method="execute">
+            <schedule>*/5 * * * *</schedule>
+        </job>
+    </group>
+</config>

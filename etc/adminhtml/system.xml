@@ -139,6 +139,17 @@
                     <validate>validate-digits validate-greater-than-zero</validate>
                     <depends><field id="resize_enabled">1</field></depends>
                 </field>
+                <field id="smart_by_viewed" translate="label comment" sortOrder="170" type="select" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Smart optimization by viewed pages</label>
+                    <comment><![CDATA[Only optimize images that frontend customers actually view (vs blanket-optimizing the entire catalog). Frontend page renders enqueue source paths; cron drains the queue every 5 min. Best for huge catalogs where most images are never viewed. <strong>Run <code>bin/magento etechflow:pso:process-view-queue --status</code> to see queue stats.</strong>]]></comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="smart_by_viewed_batch_size" translate="label comment" sortOrder="180" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Queue batch size per cron run</label>
+                    <comment><![CDATA[Default 20. Lower if your server is CPU-constrained; higher if the queue grows faster than 4 batches/hr.]]></comment>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                    <depends><field id="smart_by_viewed">1</field></depends>
+                </field>
             </group>
 
             <group id="code" translate="label" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">

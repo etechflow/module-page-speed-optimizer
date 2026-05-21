@@ -38,6 +38,9 @@
         <plugin name="etechflow_pso_picture_block"
                 type="ETechFlow\PageSpeedOptimizer\Plugin\Catalog\Block\PictureBlockPlugin"
                 sortOrder="100"/>
+        <plugin name="etechflow_pso_view_tracker"
+                type="ETechFlow\PageSpeedOptimizer\Plugin\Catalog\Block\ViewTrackerPlugin"
+                sortOrder="110"/>
     </type>
 
     <!-- CLI command registry -->
@@ -54,6 +57,8 @@
                       xsi:type="object">ETechFlow\PageSpeedOptimizer\Console\Command\OptimizeImagesCommand</item>
                 <item name="etechflow_pso_enable_js_bundling"
                       xsi:type="object">ETechFlow\PageSpeedOptimizer\Console\Command\EnableJsBundlingCommand</item>
+                <item name="etechflow_pso_process_view_queue"
+                      xsi:type="object">ETechFlow\PageSpeedOptimizer\Console\Command\ProcessViewQueueCommand</item>
             </argument>
         </arguments>
     </type>

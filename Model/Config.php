@@ -46,6 +46,10 @@ class Config
     public const XML_PATH_IMG_TABLET_W     = 'etechflow_pso/image/tablet_width';
     public const XML_PATH_LAZY_SCRIPT      = 'etechflow_pso/image/lazy_load_script';
 
+    // Smart-by-viewed (new in v2.3)
+    public const XML_PATH_SMART_BY_VIEWED        = 'etechflow_pso/image/smart_by_viewed';
+    public const XML_PATH_SMART_BY_VIEWED_BATCH  = 'etechflow_pso/image/smart_by_viewed_batch_size';
+
     // Code Optimization (new in v2.0; split toggles in v2.2)
     public const XML_PATH_HTML_MINIFY      = 'etechflow_pso/code/html_minify';
     public const XML_PATH_HTML_MINIFY_EXCLUDE = 'etechflow_pso/code/html_minify_exclude_urls';
@@ -245,6 +249,20 @@ class Config
             return false;
         }
         return $this->scopeConfig->isSetFlag(self::XML_PATH_MOVE_PRINT_CSS_FOOTER, ScopeInterface::SCOPE_STORE);
+    }
+
+    public function isSmartByViewedEnabled(): bool
+    {
+        if (!$this->isImageOptimizationEnabled()) {
+            return false;
+        }
+        return $this->scopeConfig->isSetFlag(self::XML_PATH_SMART_BY_VIEWED, ScopeInterface::SCOPE_STORE);
+    }
+
+    public function getSmartByViewedBatchSize(): int
+    {
+        $value = (int) $this->scopeConfig->getValue(self::XML_PATH_SMART_BY_VIEWED_BATCH, ScopeInterface::SCOPE_STORE);
+        return $value > 0 ? $value : 20;
     }
 
     // ─────────────────────────────────────────────────────────
