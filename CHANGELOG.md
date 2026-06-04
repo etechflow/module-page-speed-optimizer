@@ -4,6 +4,21 @@ All notable changes to this module. Adheres to [Semantic Versioning](https://sem
 
 ---
 
+## [2.4.0] — 2026-06-04 — Portal licensing (SP-XXXX + Stripe) + image-optimization & diagnose fixes
+
+### Added
+
+- **SP-XXXX portal licensing** — `Model/LicenseValidator.php` rewritten to the hybrid model (HMAC per-module/bundle key + portal-validated subscription with two-factor domain + server-IP binding, IP-block auto-management, 48h grace, result caching). Preserves the existing HMAC `MODULE_ID`/`SECRET_FRAGMENTS`/bundle key.
+- **In-admin Stripe checkout + gate page** — `Controller/Adminhtml/License/{Gate,Checkout,Activated}.php` + dark gate with Weekly $12 / Monthly $39 / Yearly $390 cards; pays via Stripe and auto-saves the issued key. New `payment` config group (Stripe keys) + license fields (issued_key, portal_url, bundle key). All four admin pages (Diagnose, Trends, Image Optimization Log, Cron Tasks) gate to the license page until activated.
+
+### Fixed
+
+- **Diagnose desktop timeouts** — added a 2-attempt retry in `Model/Psi/PsiClient.php` (full first attempt + short cached-result retry) so Google PSI's occasional desktop stalls self-recover.
+- **Image Optimization Log page crashed (cascade of shipped naming bugs)**: `Model/Source/OptimizationStatusOptions.php` declared `class StatusOptions` → renamed; layout block path `…\Log\SavingsSummary` → `…\OptimizationLog\SavingsSummary`; template `::log/…` → `::optimizationlog/…`; grid dataProvider `ETechFlowIoLogGridDataProvider` → `ETechFlowPsoOptimizationLogGridDataProvider`; added the missing `SearchResult` grid-collection virtualType in di.xml.
+- **Bulk WebP conversion silently failed every image** — `Model/Image/WebpGenerator.php` was missing `use …\Model\OptimizationLog;`, so `OptimizationLog::STATUS_OK` resolved to a non-existent class and the log insert threw. `etechflow:pso:optimize-images` now converts + logs correctly (~50% size reduction with Imagick/GD).
+- **PSI API key field** changed from `obscure` (encrypted) to plain `text` to match the non-decrypting getter (a Google PSI key is non-sensitive).
+- **Admin menu** no longer re-declares the shared `eTechFlow::root` node (avoids a duplicate-menu crash when other eTechFlow modules are installed).
+
 ## [2.3.1] — 2026-05-30 — First Packagist release: menu reorganisation + always-a-patch discipline
 
 First tagged release on Packagist. Prior versions existed in the internal

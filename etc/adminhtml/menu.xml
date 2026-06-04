@@ -2,33 +2,10 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
     <menu>
-        <!-- Shared eTechFlow top-level — declared identically by every
-             eTechFlow module so Magento merges to one sidebar entry.
-             See reference_etechflow_menu_convention. -->
-        <add id="eTechFlow::root"
-             title="eTechFlow"
-             module="ETechFlow_PageSpeedOptimizer"
-             sortOrder="68"
-             resource="Magento_Backend::admin"/>
-
-        <add id="eTechFlow::settings"
-             title="Settings"
-             module="ETechFlow_PageSpeedOptimizer"
-             sortOrder="500"
-             parent="eTechFlow::root"
-             resource="Magento_Backend::admin"/>
-
-        <add id="eTechFlow::configuration"
-             title="Configuration"
-             module="ETechFlow_PageSpeedOptimizer"
-             sortOrder="10"
-             parent="eTechFlow::settings"
-             action="adminhtml/system_config/edit/section/etechflow_pso"
-             resource="Magento_Config::config"/>
-
-        <!-- Page Speed Optimizer column. Previously all 4 entries were
-             parented directly under Magento_Backend::system_other_settings;
-             now they share a single PSO column header. -->
+        <!-- Shared eTechFlow top-level (eTechFlow::root / settings / configuration)
+             is declared by ETechFlow_ImageOptimizer. Declaring it again here would
+             produce a duplicate 'uniqueAddItemId' in the merged admin menu and break
+             EVERY admin page, so this module only parents its own column under it. -->
         <add id="ETechFlow_PageSpeedOptimizer::management"
              title="Page Speed Optimizer"
              module="ETechFlow_PageSpeedOptimizer"

@@ -7,7 +7,7 @@ namespace ETechFlow\PageSpeedOptimizer\Model\Source;
 use ETechFlow\PageSpeedOptimizer\Model\OptimizationLog;
 use Magento\Framework\Data\OptionSourceInterface;
 
-class StatusOptions implements OptionSourceInterface
+class OptimizationStatusOptions implements OptionSourceInterface
 {
     public function toOptionArray(): array
     {

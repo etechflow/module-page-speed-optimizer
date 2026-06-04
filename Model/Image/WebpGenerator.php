@@ -6,6 +6,7 @@ namespace ETechFlow\PageSpeedOptimizer\Model\Image;
 
 use ETechFlow\PageSpeedOptimizer\Model\Image\Engine\EngineChain;
 use ETechFlow\PageSpeedOptimizer\Model\Config;
+use ETechFlow\PageSpeedOptimizer\Model\OptimizationLog;
 use ETechFlow\PageSpeedOptimizer\Model\OptimizationLogFactory;
 use ETechFlow\PageSpeedOptimizer\Model\Performance\Profiler;
 use ETechFlow\PageSpeedOptimizer\Model\ResourceModel\OptimizationLog as OptimizationLogResource;

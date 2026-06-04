@@ -4,9 +4,9 @@
     <update handle="styles"/>
     <body>
         <referenceContainer name="content">
-            <block class="ETechFlow\PageSpeedOptimizer\Block\Adminhtml\Log\SavingsSummary"
+            <block class="ETechFlow\PageSpeedOptimizer\Block\Adminhtml\OptimizationLog\SavingsSummary"
                    name="etechflow.io.log.savings"
-                   template="ETechFlow_PageSpeedOptimizer::log/savings-summary.phtml"
+                   template="ETechFlow_PageSpeedOptimizer::optimizationlog/savings-summary.phtml"
                    cacheable="false"/>
             <uiComponent name="etechflow_pso_optimization_log_listing"/>
         </referenceContainer>

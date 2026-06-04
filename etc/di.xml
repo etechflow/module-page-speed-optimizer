@@ -81,7 +81,7 @@
                  type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
         <arguments>
             <argument name="collection"
-                      xsi:type="object" shared="false">ETechFlow\PageSpeedOptimizer\Model\ResourceModel\OptimizationLog\Collection</argument>
+                      xsi:type="object" shared="false">ETechFlowPsoOptimizationLogGridCollection</argument>
             <argument name="filterPool"
                       xsi:type="object" shared="false">ETechFlowPsoOptimizationLogGridFilterPool</argument>
         </arguments>
@@ -91,8 +91,18 @@
         <arguments>
             <argument name="collections" xsi:type="array">
                 <item name="etechflow_pso_optimization_log_listing_data_source"
-                      xsi:type="string">ETechFlow\PageSpeedOptimizer\Model\ResourceModel\OptimizationLog\Collection</item>
+                      xsi:type="string">ETechFlowPsoOptimizationLogGridCollection</item>
             </argument>
         </arguments>
     </type>
+
+    <!-- SearchResult-based grid collection — the UI DataProvider requires a
+         SearchResultInterface, not the plain entity Collection. -->
+    <virtualType name="ETechFlowPsoOptimizationLogGridCollection"
+                 type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">etechflow_pso_optimization_log</argument>
+            <argument name="resourceModel" xsi:type="string">ETechFlow\PageSpeedOptimizer\Model\ResourceModel\OptimizationLog</argument>
+        </arguments>
+    </virtualType>
 </config>

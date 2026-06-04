@@ -67,21 +67,46 @@ class PsiClient
             }
             $requestUrl = self::API_ENDPOINT . '?' . http_build_query($query);
 
-            $this->curl->setOption(CURLOPT_TIMEOUT, $timeout);
-            $this->curl->setOption(CURLOPT_CONNECTTIMEOUT, 30);
-            $this->curl->setOption(CURLOPT_RETURNTRANSFER, true);
-
-            try {
-                $this->curl->get($requestUrl);
-            } catch (\Throwable $e) {
-                return $this->failedResult($url, $strategy, sprintf('Network error: %s', $e->getMessage()));
+            // Google PSI (esp. the desktop strategy on heavy pages) is variable:
+            // usually ~30-40s, but it sometimes stalls server-side and returns
+            // nothing even past a long timeout. Waiting longer doesn't help a
+            // stalled request, but a fresh retry does — by then Google has often
+            // cached the result from the first (server-side-completed) run and
+            // returns it in seconds. So: one full-length attempt for the cold
+            // analysis, then a short second attempt to grab the cached result.
+            $attemptTimeouts = [max(30, (int) $timeout), 45];
+            $statusCode = 0;
+            $body       = '';
+            $lastError  = '';
+            foreach ($attemptTimeouts as $idx => $attemptTimeout) {
+                try {
+                    $this->curl->setOption(CURLOPT_TIMEOUT, $attemptTimeout);
+                    $this->curl->setOption(CURLOPT_CONNECTTIMEOUT, 20);
+                    $this->curl->setOption(CURLOPT_RETURNTRANSFER, true);
+                    $this->curl->get($requestUrl);
+                    $statusCode = (int) $this->curl->getStatus();
+                    $body = (string) $this->curl->getBody();
+                } catch (\Throwable $e) {
+                    $lastError = $e->getMessage();
+                    $statusCode = 0;
+                    $body = '';
+                }
+                if ($statusCode === 200 && $body !== '') {
+                    break;
+                }
+                if ($idx === 0) {
+                    sleep(2); // let the cold run settle/cache before the retry
+                }
             }
 
-            $statusCode = (int) $this->curl->getStatus();
-            $body = (string) $this->curl->getBody();
-
-            if ($statusCode !== 200) {
-                return $this->failedResult($url, $strategy, $this->extractApiError($body, $statusCode));
+            if ($statusCode !== 200 || $body === '') {
+                $msg = $body !== ''
+                    ? $this->extractApiError($body, $statusCode)
+                    : sprintf(
+                        'Google PSI did not respond in time (%s). The desktop strategy is slower on heavy pages — please click Run again; it usually returns instantly the second time.',
+                        $lastError !== '' ? $lastError : 'timeout'
+                    );
+                return $this->failedResult($url, $strategy, $msg);
             }
 
             $data = json_decode($body, true);
