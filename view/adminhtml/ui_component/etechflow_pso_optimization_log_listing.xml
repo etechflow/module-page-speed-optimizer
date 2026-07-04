@@ -22,7 +22,7 @@
             </storageConfig>
             <updateUrl path="mui/index/render"/>
         </settings>
-        <aclResource>ETechFlow_PageSpeedOptimizer::log</aclResource>
+        <aclResource>ETechFlow_PageSpeedOptimizer::optimizationlog</aclResource>
         <dataProvider class="ETechFlowPsoOptimizationLogGridDataProvider"
                       name="etechflow_pso_optimization_log_listing_data_source">
             <settings>

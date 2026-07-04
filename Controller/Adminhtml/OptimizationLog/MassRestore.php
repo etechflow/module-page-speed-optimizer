@@ -27,7 +27,7 @@ use Psr\Log\LoggerInterface;
  */
 class MassRestore extends Action
 {
-    public const ADMIN_RESOURCE = 'ETechFlow_PageSpeedOptimizer::log_restore';
+    public const ADMIN_RESOURCE = 'ETechFlow_PageSpeedOptimizer::optimizationlog_restore';
 
     public function __construct(
         Context $context,

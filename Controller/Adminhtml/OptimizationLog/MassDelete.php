@@ -25,7 +25,7 @@ use Magento\Ui\Component\MassAction\Filter;
  */
 class MassDelete extends Action
 {
-    public const ADMIN_RESOURCE = 'ETechFlow_PageSpeedOptimizer::log_delete';
+    public const ADMIN_RESOURCE = 'ETechFlow_PageSpeedOptimizer::optimizationlog_delete';
 
     public function __construct(
         Context $context,

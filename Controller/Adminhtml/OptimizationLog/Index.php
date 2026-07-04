@@ -13,7 +13,7 @@ use Magento\Framework\View\Result\PageFactory;
 
 class Index extends Action
 {
-    public const ADMIN_RESOURCE = 'ETechFlow_PageSpeedOptimizer::log';
+    public const ADMIN_RESOURCE = 'ETechFlow_PageSpeedOptimizer::optimizationlog';
 
     public function __construct(
         Context $context,
@@ -29,7 +29,7 @@ class Index extends Action
             return $this->resultFactory->create(ResultFactory::TYPE_REDIRECT)->setPath('etechflow_pso/license/gate');
         }
         $page = $this->pageFactory->create();
-        $page->setActiveMenu('ETechFlow_PageSpeedOptimizer::log');
+        $page->setActiveMenu('ETechFlow_PageSpeedOptimizer::optimizationlog');
         $page->getConfig()->getTitle()->prepend(__('Image Optimization Log'));
         return $page;
     }
